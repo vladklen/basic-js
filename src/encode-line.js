@@ -34,5 +34,3 @@ function encodeLine(argument) {
 module.exports = {
   encodeLine,
 };
-
-// console.log(encodeLine("abbcca"));
