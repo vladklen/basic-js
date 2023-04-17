@@ -20,72 +20,67 @@ const { NotImplementedError } = require("../extensions/index.js");
  *
  */
 class VigenereCipheringMachine {
+  type = true;
   constructor(boolean) {
-    this.direct = boolean === false ? false : true;
-    this.text = null;
-    this.square = [];
-    this.alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    this.symbols = {};
-  }
-
-  generateSquare() {
-    for (let i = 0; i < this.alphabet.length; i++) {
-      let row = this.alphabet.slice(i);
-      row += this.alphabet.slice(0, i);
-      this.square.push(row);
-    }
-  }
-  getSquare() {
-    return this.square;
-  }
-
-  getSymbols(string) {
-    const alph = this.alphabet.split("");
-    const arrayStr = string.toUpperCase().split("");
-    arrayStr.forEach((element, index) => {
-      if (!alph.includes(element)) {
-        this.symbols[index] = element;
-      }
-    });
-  }
-
-  repeatString(firstString, secondString) {
-    let resultString = "";
-    let firstStringLength = firstString.length;
-    let it = 0;
-    for (let i = 0; i < secondString.length; i++) {
-      if (i % firstStringLength === 0) {
-        it = 0;
-      }
-      resultString += firstString[it];
-      it++;
-    }
-    return resultString.toLowerCase();
+    this.type = boolean === false ? false : true;
+    this.alphabet = [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "U",
+      "V",
+      "W",
+      "X",
+      "Y",
+      "Z",
+    ];
   }
 
   encrypt(string, key) {
     if (!string || !key) {
       throw new Error("Incorrect arguments!");
     }
-    this.getSymbols(string);
-    let message = string
-      .replace(/[^a-z ]/gi, "")
-      .replace(/\s/g, "")
-      .toLowerCase();
-    let encryptMessage = "";
-    let newKey = this.repeatString(key, message);
-    this.generateSquare();
-    for (let it = 0; it < message.length; it++) {
-      let i = this.alphabet.toLowerCase().indexOf(message[it]);
-      let j = this.alphabet.toLowerCase().indexOf(newKey[it]);
-      encryptMessage += this.square[i][j];
-    }
 
-    let result = encryptMessage.split("");
-    for (let key in this.symbols) {
-      result.splice(key, 0, this.symbols[key]);
+    let strArr = string.toUpperCase().split("");
+    let keyArr = key.toUpperCase().split("");
+    let result = [];
+    let count = 0;
+    for (let i = 0; i < strArr.length; i++) {
+      let strIndex = this.alphabet.indexOf(strArr[i]);
+      if (strIndex === -1) {
+        result.push(strArr[i]);
+      } else {
+        if (count >= key.length) {
+          count = count % keyArr.length;
+        }
+        let keyIndex = this.alphabet.indexOf(keyArr[count]);
+        let letters =
+          this.alphabet[
+            (this.alphabet.length + (strIndex + keyIndex)) %
+              this.alphabet.length
+          ];
+        result.push(letters);
+        count++;
+      }
     }
-    if (this.direct) {
+    if (this.type) {
       return result.join("");
     } else {
       return result.reverse().join("");
@@ -96,25 +91,30 @@ class VigenereCipheringMachine {
     if (!string || !key) {
       throw new Error("Incorrect arguments!");
     }
-    this.getSymbols(string);
-    let message = string
-      .replace(/[^a-z ]/gi, "")
-      .replace(/\s/g, "")
-      .toLowerCase();
-    let decryptMessage = "";
-    let newKey = this.repeatString(key, message);
-    this.generateSquare();
-    for (let it = 0; it < message.length; it++) {
-      let i = this.alphabet.toLowerCase().indexOf(newKey[it]);
-      let j = this.square[i].toLowerCase().indexOf(message[it]);
-      decryptMessage += this.alphabet[j];
-    }
-    let result = decryptMessage.split("");
-    for (let key in this.symbols) {
-      result.splice(key, 0, this.symbols[key]);
-    }
 
-    if (this.direct) {
+    let strArr = string.toUpperCase().split("");
+    let keyArr = key.toUpperCase().split("");
+    let result = [];
+    let count = 0;
+    for (let i = 0; i < strArr.length; i++) {
+      let strIndex = this.alphabet.indexOf(strArr[i]);
+      if (strIndex === -1) {
+        result.push(strArr[i]);
+      } else {
+        if (count >= key.length) {
+          count = count % keyArr.length;
+        }
+        let keyIndex = this.alphabet.indexOf(keyArr[count]);
+        let letters =
+          this.alphabet[
+            (this.alphabet.length + (strIndex - keyIndex)) %
+              this.alphabet.length
+          ];
+        result.push(letters);
+        count++;
+      }
+    }
+    if (this.type) {
       return result.join("");
     } else {
       return result.reverse().join("");
@@ -125,3 +125,10 @@ class VigenereCipheringMachine {
 module.exports = {
   VigenereCipheringMachine,
 };
+
+// const directMachine = new VigenereCipheringMachine();
+// const reverseMachine = new VigenereCipheringMachine(false);
+
+// console.log(
+//   directMachine.encrypt("Example of sequence: 1, 2, 3, 4.", "lilkey")
+// );
